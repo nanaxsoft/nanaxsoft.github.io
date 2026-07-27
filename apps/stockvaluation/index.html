@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>上場株式の相続税評価額 計算ツール｜証券コードと相続開始日だけで評価明細書PDFまで自動作成</title>
+<meta name="description" content="証券コードと相続開始日を入力するだけで、上場株式の相続税評価額（財産評価基本通達169準拠・4価額の最小を自動採用）と、国税庁様式の評価明細書PDFを自動作成。根拠のマーカー画像（証跡）付き。Windows用・¥9,800（税込）・無料体験版あり。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=Shippori+Mincho:wght@600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* Hallmark · genre: editorial · macrostructure: Workbench · theme: custom (vibe: 官公庁様式・台帳・信頼の紺
+ * · paper oklch(97.5% 0.005 262) · accent oklch(42% 0.16 265) cool-navy
+ * · display Shippori Mincho + body Zen Kaku Gothic New · outlier IBM Plex Mono role=数値)
+ * · axes: light / classical-serif / cool · nav: N9 edge-aligned · footer: Ft4 dense colophon
+ * · S2 hanging heads · F3 tabular spec · C4 sticky bar (after-fold) · C3 typographic links
+ * · enrichment: none (real screenshots, hairline figure only) · studied: no
+ * Hallmark · pre-emit critique: P4 H5 E4 S4 R5 V4 */
+:root{
+  --color-paper:    oklch(97.5% 0.005 262);
+  --color-paper-2:  oklch(95%   0.008 262);
+  --color-rule:     oklch(86%   0.012 262);
+  --color-neutral:  oklch(48%   0.02  262);
+  --color-muted:    oklch(38%   0.025 263);
+  --color-ink:      oklch(23%   0.03  265);
+  --color-accent:   oklch(42%   0.16  265);
+  --color-accent-2: oklch(93%   0.02  265);
+  --color-focus:    oklch(50%   0.18  265);
+
+  --font-display: "Shippori Mincho", "Noto Serif JP", "Yu Mincho", serif;
+  --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic UI", sans-serif;
+  --font-num: "IBM Plex Mono", ui-monospace, monospace;
+
+  --space-2xs: .5rem; --space-xs: .75rem; --space-sm: 1rem; --space-md: 1.5rem;
+  --space-lg: 2rem; --space-xl: 3rem; --space-2xl: 4.5rem; --space-3xl: 7rem;
+
+  --text-sm: .8125rem; --text-base: 1rem; --text-md: 1.1875rem;
+  --text-lg: 1.4375rem; --text-xl: 1.75rem;
+  --text-display: clamp(1.75rem, 2.6vw + 1rem, 2.75rem);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-short: 200ms;
+  --measure: 42em;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+html,body{ overflow-x:clip; }
+html{ scroll-behavior:smooth; }
+body{
+  font-family:var(--font-body); font-weight:400;
+  color:var(--color-ink); background:var(--color-paper);
+  line-height:1.9; font-size:var(--text-base);
+  -webkit-font-smoothing:antialiased;
+}
+img{ max-width:100%; height:auto; display:block; }
+a{ color:var(--color-accent); text-decoration:underline; text-underline-offset:.2em; text-decoration-thickness:1px; }
+a:hover{ text-decoration-thickness:2px; }
+a:focus-visible, button:focus-visible, summary:focus-visible{
+  outline:2px solid var(--color-focus); outline-offset:2px; border-radius:2px;
+}
+::selection{ background:var(--color-accent-2); }
+
+.page{ max-width:66rem; margin:0 auto; padding-inline:clamp(1rem, 4vw, 2.5rem); }
+
+/* ── N9 edge-aligned nav ─────────────────────────── */
+nav{
+  display:flex; justify-content:space-between; align-items:baseline; gap:var(--space-md);
+  padding-block:var(--space-md) var(--space-sm);
+  border-bottom:1px solid var(--color-rule);
+}
+.wordmark{ font-family:var(--font-display); font-weight:700; font-size:var(--text-md); color:var(--color-ink); text-decoration:none; }
+.wordmark:hover{ text-decoration:none; }
+.nav-cta{ font-size:var(--text-sm); white-space:nowrap; }
+
+/* ── hero（Workbench lite・split 7/5：文左・写真右） ── */
+.hero{
+  padding-block:var(--space-2xl) var(--space-xl);
+  display:grid; grid-template-columns:minmax(0,7fr) minmax(0,5fr);
+  gap:var(--space-md) var(--space-2xl); align-items:center;
+}
+.hero-txt{ max-width:var(--measure); min-width:0; }
+.hero-photo{ min-width:0; }
+.hero-photo img{ border:1px solid var(--color-rule); }
+.hero-photo figcaption{ font-size:var(--text-sm); color:var(--color-neutral); margin-top:var(--space-2xs); }
+h1{
+  font-family:var(--font-display); font-weight:700; font-style:normal;
+  font-size:var(--text-display); line-height:1.45; letter-spacing:.01em;
+  overflow-wrap:anywhere; min-width:0;
+}
+h1 .u{ border-bottom:3px solid var(--color-accent); padding-bottom:.05em; }
+.hero .lede{ margin-top:var(--space-md); color:var(--color-muted); max-width:var(--measure); }
+.hero .meta{ margin-top:var(--space-sm); font-size:var(--text-sm); color:var(--color-neutral); }
+.priceline{
+  margin-top:var(--space-lg); display:flex; flex-wrap:wrap; align-items:baseline; gap:var(--space-2xs) var(--space-md);
+}
+.price{ font-family:var(--font-num); font-weight:500; font-variant-numeric:tabular-nums; font-size:var(--text-xl); letter-spacing:-.01em; }
+.price small{ font-family:var(--font-body); font-size:var(--text-sm); color:var(--color-neutral); font-weight:400; }
+.cta-link{ font-weight:700; white-space:nowrap; }
+.hero .trial-note{ font-size:var(--text-sm); color:var(--color-neutral); margin-top:var(--space-2xs); }
+
+/* ── S2 hanging section heads ────────────────────── */
+section{ padding-block:var(--space-2xl) 0; }
+h2{
+  font-family:var(--font-display); font-weight:600; font-style:normal;
+  font-size:var(--text-xl); line-height:1.5; letter-spacing:.01em;
+  overflow-wrap:anywhere; min-width:0;
+}
+.sec-lede{ margin-top:var(--space-xs); color:var(--color-muted); max-width:var(--measure); }
+
+/* ── 課題（プレーン・箱なし） ─────────────────────── */
+.problem{ max-width:var(--measure); }
+.problem p{ margin-top:var(--space-sm); }
+.problem .fn{ font-size:var(--text-sm); color:var(--color-neutral); margin-top:var(--space-xs); }
+em{ font-style:normal; font-weight:700; background:linear-gradient(transparent 68%, var(--color-accent-2) 68%); }
+
+/* ── ツアー（Workbench本体） ─────────────────────── */
+.tour{ display:grid; gap:var(--space-2xl); margin-top:var(--space-xl); }
+.stop{ display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:var(--space-md) var(--space-xl); align-items:start; }
+.stop:nth-child(even){ grid-template-columns:minmax(0,7fr) minmax(0,5fr); }
+.stop:nth-child(even) .stop-txt{ order:2; }
+.stop h3{
+  font-family:var(--font-display); font-weight:600; font-size:var(--text-lg); line-height:1.5;
+}
+.stop h3::before{ content:""; display:inline-block; width:.5em; height:.5em; background:var(--color-accent); margin-right:.45em; vertical-align:baseline; }
+.stop p{ margin-top:var(--space-sm); font-size:var(--text-base); color:var(--color-muted); }
+.stop figure{ min-width:0; }
+.stop img{ border:1px solid var(--color-rule); }
+.stop figcaption{ font-size:var(--text-sm); color:var(--color-neutral); margin-top:var(--space-2xs); }
+
+/* ── 証跡（split・非対称） ────────────────────────── */
+.evidence{ border-top:1px solid var(--color-rule); margin-top:var(--space-2xl); }
+.evidence .row{ display:grid; grid-template-columns:minmax(0,7fr) minmax(0,5fr); gap:var(--space-xl); margin-top:var(--space-lg); align-items:center; }
+.evidence img{ border:1px solid var(--color-rule); }
+.evidence .cap{ font-size:var(--text-sm); color:var(--color-neutral); margin-top:var(--space-2xs); }
+.evidence h3{ font-family:var(--font-display); font-weight:600; font-size:var(--text-lg); line-height:1.5; }
+.evidence p{ margin-top:var(--space-sm); color:var(--color-muted); }
+
+/* ── F3 台帳型スペックシート（機能一覧） ─────────── */
+.spec{ margin-top:var(--space-lg); border-top:2px solid var(--color-ink); }
+.spec-row{ display:grid; grid-template-columns:minmax(0,4fr) minmax(0,8fr); gap:var(--space-2xs) var(--space-lg); padding-block:var(--space-sm); border-bottom:1px solid var(--color-rule); }
+.spec-row dt{ font-weight:700; font-size:var(--text-base); }
+.spec-row dd{ color:var(--color-muted); font-size:var(--text-base); }
+
+/* ── 動作環境（インラインdl） ─────────────────────── */
+.env dl{ margin-top:var(--space-md); max-width:var(--measure); }
+.env dt{ font-weight:700; display:inline; }
+.env dt::after{ content:" — "; color:var(--color-neutral); font-weight:400; }
+.env dd{ display:inline; color:var(--color-muted); }
+.env div{ margin-bottom:var(--space-xs); }
+.env .fn{ font-size:var(--text-sm); color:var(--color-neutral); margin-top:var(--space-md); max-width:var(--measure); }
+
+/* ── FAQ ─────────────────────────────────────────── */
+.faq details{ border-bottom:1px solid var(--color-rule); }
+.faq details:first-of-type{ border-top:1px solid var(--color-rule); margin-top:var(--space-lg); }
+.faq summary{
+  cursor:pointer; list-style:none; padding-block:var(--space-sm);
+  font-weight:700; font-size:var(--text-base); position:relative; padding-right:2rem;
+}
+.faq summary::-webkit-details-marker{ display:none; }
+.faq summary::after{ content:"＋"; position:absolute; right:.25rem; top:var(--space-sm); color:var(--color-accent); font-weight:400; }
+.faq details[open] summary::after{ content:"－"; }
+.faq .a{ padding-bottom:var(--space-md); color:var(--color-muted); font-size:var(--text-base); max-width:var(--measure); }
+
+/* ── 免責・出典 ───────────────────────────────────── */
+.legal p{ margin-top:var(--space-sm); color:var(--color-muted); font-size:var(--text-sm); max-width:var(--measure); }
+.legal p strong{ color:var(--color-ink); }
+
+/* ── 特商法 ──────────────────────────────────────── */
+.law-wrap{ margin-top:var(--space-lg); }
+.law-wrap summary{ cursor:pointer; list-style:none; font-size:var(--text-sm); font-weight:700; color:var(--color-neutral); padding-block:var(--space-xs); }
+.law-wrap summary::-webkit-details-marker{ display:none; }
+.law-wrap summary::before{ content:"＋ "; color:var(--color-accent); }
+.law-wrap details[open] summary::before{ content:"－ "; }
+table.law{ width:100%; border-collapse:collapse; font-size:var(--text-sm); margin-top:var(--space-xs); }
+table.law th, table.law td{ border-bottom:1px solid var(--color-rule); padding:.65rem .5rem; text-align:left; vertical-align:top; }
+table.law th{ color:var(--color-ink); width:11rem; font-weight:700; }
+table.law td{ color:var(--color-muted); }
+.law-wrap .fn{ font-size:var(--text-sm); color:var(--color-neutral); margin-top:var(--space-xs); }
+
+/* ── 最終CTA（静かな結び） ────────────────────────── */
+.close{ border-top:1px solid var(--color-rule); margin-top:var(--space-2xl); padding-block:var(--space-2xl); }
+.close h2{ max-width:var(--measure); }
+.close p{ margin-top:var(--space-sm); color:var(--color-muted); max-width:var(--measure); }
+.close .priceline{ margin-top:var(--space-md); }
+
+/* ── C4 sticky bottom bar（ツアー通過後に出現） ──── */
+.sticky-cta{
+  position:fixed; inset-inline:0; bottom:0; z-index:10;
+  background:var(--color-paper); border-top:1px solid var(--color-rule);
+  transform:translateY(110%); opacity:0;
+  transition:transform 300ms var(--ease-out), opacity 300ms var(--ease-out);
+}
+.sticky-cta.show{ transform:translateY(0); opacity:1; }
+.sticky-cta .inner{
+  max-width:66rem; margin:0 auto; padding:.7rem clamp(1rem,4vw,2.5rem);
+  display:flex; justify-content:space-between; align-items:center; gap:var(--space-md);
+}
+.sticky-cta .p{ font-family:var(--font-num); font-variant-numeric:tabular-nums; font-weight:500; font-size:var(--text-md); }
+.sticky-cta .p small{ font-family:var(--font-body); color:var(--color-neutral); font-size:var(--text-sm); }
+.sticky-cta a{ font-weight:700; white-space:nowrap; }
+
+/* ── Ft4 dense colophon ──────────────────────────── */
+footer{
+  border-top:2px solid var(--color-ink); margin-top:var(--space-2xl);
+  padding-block:var(--space-lg) var(--space-3xl);
+  font-size:var(--text-sm); color:var(--color-neutral); line-height:1.9;
+}
+footer .fbrand{ font-family:var(--font-display); font-weight:600; color:var(--color-ink); font-size:var(--text-base); }
+footer p{ margin-top:var(--space-xs); max-width:56em; }
+
+/* ── モーション：初回入場（ヒーローのみ）＋ツアーのスクロール開示 ── */
+@keyframes rise-in{ from{ opacity:0; transform:translateY(14px); } to{ opacity:1; transform:none; } }
+.hero-txt{ animation:rise-in 600ms var(--ease-out) both; }
+.hero-photo{ animation:rise-in 600ms var(--ease-out) 120ms both; }
+.reveal{ opacity:0; transform:translateY(18px); transition:opacity 650ms var(--ease-out), transform 650ms var(--ease-out); }
+.reveal.in{ opacity:1; transform:none; }
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  .sticky-cta{ transition:opacity 150ms linear; transform:none; }
+  .hero-txt, .hero-photo{ animation:none; }
+  .reveal{ opacity:1; transform:none; transition:none; }
+}
+@media (max-width:60rem){
+  .hero{ grid-template-columns:minmax(0,1fr); }
+  .stop, .stop:nth-child(even), .evidence .row{ grid-template-columns:minmax(0,1fr); }
+  .stop:nth-child(even) .stop-txt{ order:0; }
+}
+@media (max-width:40rem){
+  .hero{ padding-block:var(--space-xl) var(--space-lg); }
+  section{ padding-block:var(--space-xl) 0; }
+  .spec-row{ grid-template-columns:minmax(0,1fr); }
+  table.law th{ width:7.5rem; }
+  .sticky-cta .p small{ display:none; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <nav>
+    <a class="wordmark" href="#top">上場株式の相続税評価額 計算ツール</a>
+    <a class="nav-cta" href="https://www.vector.co.jp/soft/winnt/business/se529138.html">無料体験版 →</a>
+  </nav>
+
+  <header class="hero" id="top">
+    <div class="hero-txt">
+      <h1>証券コードと相続開始日だけで、<span class="u">評価明細書PDF</span>まで。</h1>
+      <p class="lede">財産評価基本通達169に準拠し、相続開始日の終値と当月・前月・前々月の月間平均——4つの価額から最小値を自動採用。採用根拠をマーキングした証跡画像まで残せる、相続税評価の補助計算ツールです。</p>
+      <p class="meta">StockValuation 7.1.2 ／ Windows 10・11（64bit）／ 提供：Nanax Soft</p>
+      <div class="priceline">
+        <span class="price">¥9,800 <small>（税込・買い切り）</small></span>
+        <a class="cta-link" href="https://www.vector.co.jp/soft/winnt/business/se529138.html">無料体験版をダウンロード →</a>
+      </div>
+      <p class="trial-note">体験版は無料。ご購入いただくとライセンスキーで全機能が解除されます。</p>
+    </div>
+    <figure class="hero-photo">
+      <img src="assets/10_hero_calc.jpg" alt="電卓で計算する実務者の手元" fetchpriority="high" width="1600" height="1067">
+    </figure>
+  </header>
+
+  <section class="problem">
+    <h2>集計と転記の積み重ねを、入力ひとつに。</h2>
+    <p>上場株式の相続税評価では、相続開始日の終値に加えて、その月・前月・前々月の月間平均終値を銘柄ごとに集め、4つの価額を比べて最も低い額を採用します。資料を一銘柄ずつ探して数字を拾い、評価明細書へ書き写す——銘柄が増えるほど時間がかかり、転記ミスのリスクも高まります。</p>
+    <p>本ツールなら、証券コードと相続開始日を入力するだけ。4つの価額の集計・最小値の採用・評価明細書PDFへの記入までを自動化し、<em>数時間かかっていた集計・転記を分単位に</em>短縮します。</p>
+    <p class="fn">※ 短縮効果は標準的なケースの目安です。銘柄数・回線環境により変動します。</p>
+  </section>
+
+  <section id="how">
+    <h2>使い方 — 画面の流れに沿って3ステップ</h2>
+    <div class="tour">
+
+      <div class="stop">
+        <div class="stop-txt">
+          <h3>銘柄を登録する</h3>
+          <p>相続開始日を入れ、証券コードまたは銘柄名で検索して登録。複数銘柄をまとめて登録できます。英字を含む銘柄コード・上場廃止銘柄・ETF／REITにも対応します。</p>
+        </div>
+        <figure>
+          <img src="assets/03_registered.jpg" alt="銘柄を検索して登録した画面（トヨタ自動車・NTT・ソニーグループの3銘柄を一括登録）" fetchpriority="high">
+          <figcaption>相続開始日と銘柄を登録（複数銘柄の一括登録に対応）</figcaption>
+        </figure>
+      </div>
+
+      <div class="stop">
+        <div class="stop-txt">
+          <h3>計算する</h3>
+          <p>「計算実行」を押すと、終値・当月／前月／前々月の月間平均の4価額を集計し、最小値（評価額）を自動採用。結果を一覧でプレビューできます。</p>
+        </div>
+        <figure>
+          <img src="assets/04_result.jpg" alt="計算結果プレビュー画面。終値・当月平均・前月平均・前々月平均・評価額が銘柄ごとに一覧表示される" loading="lazy">
+          <figcaption>4つの価額と、採用した評価額（最小値）を一覧表示</figcaption>
+        </figure>
+      </div>
+
+      <div class="stop">
+        <div class="stop-txt">
+          <h3>評価明細書PDFを出力する</h3>
+          <p>国税庁様式（資4-30）に沿った「上場株式の評価明細書」PDFを自動作成。Excel（個別＋サマリー）も出力できます。申告書類の下書き・補助資料としてご活用ください。</p>
+        </div>
+        <figure>
+          <img src="assets/05_nta_pdf.jpg" alt="出力された国税庁様式「上場株式の評価明細書」PDFの例。銘柄ごとに最終価格と月平均額、評価額が記入されている" loading="lazy">
+          <figcaption>国税庁様式「上場株式の評価明細書」（資4-30）に各欄を記入した下書きPDF</figcaption>
+        </figure>
+      </div>
+
+    </div>
+
+    <div class="evidence">
+      <div class="row">
+        <figure>
+          <img src="assets/06_evidence.jpg" alt="採用根拠の証跡画像の例。月間相場表・日報の該当行が黄色でマーキングされ、どの資料のどの数字を採用したかが分かる" loading="lazy">
+          <p class="cap">図はトヨタ自動車（7203）の参照データ画面の例です。</p>
+        </figure>
+        <div>
+          <h3>「どの数字を、なぜ採ったか」が残る</h3>
+          <p>評価額の根拠となった終値・月平均は、参照した公開資料の該当行をマーキングした画像（証跡）として保存できます。採用の経緯が一目で分かるため、確認や説明のしやすさが高まります。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <h2>主な機能</h2>
+    <p class="sec-lede">正確性・説明可能性・時短を、実務の流れに沿って支援します。</p>
+    <dl class="spec">
+      <div class="spec-row">
+        <dt>4価額の最小を自動採用</dt>
+        <dd>財産評価基本通達169準拠。相続開始日の終値（休日は近傍の営業日へ補正）と、当月・前月・前々月の月間平均終値から最小値を自動で採用します。</dd>
+      </div>
+      <div class="spec-row">
+        <dt>採用根拠のマーカー画像（証跡）</dt>
+        <dd>採用した数値が公開資料のどこから来たか、該当箇所をマーキングした画像を保存。後からの確認・説明に使えます。</dd>
+      </div>
+      <div class="spec-row">
+        <dt>国税庁様式の評価明細書PDF</dt>
+        <dd>「上場株式の評価明細書」様式（資4-30）に沿ったPDFを自動作成。Excel（個別＋サマリー）も出力できます。</dd>
+      </div>
+      <div class="spec-row">
+        <dt>JPX営業日カレンダーで休日補正</dt>
+        <dd>相続開始日が休日でも、JPX営業日カレンダーに基づき近傍の営業日へ自動補正します。</dd>
+      </div>
+      <div class="spec-row">
+        <dt>複数銘柄を一括処理</dt>
+        <dd>複数銘柄をまとめて評価し、銘柄個別＋サマリーで出力。CSVでの銘柄の読込・保存にも対応します。</dd>
+      </div>
+      <div class="spec-row">
+        <dt>実務ケースに対応</dt>
+        <dd>上場廃止銘柄、英字を含む銘柄コード、ETF・REITに対応。多様な相続案件で使えます。</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="env" id="env">
+    <h2>動作環境</h2>
+    <dl>
+      <div><dt>対応OS</dt><dd>Windows 10／11（64bit）</dd></div>
+      <div><dt>導入</dt><dd>exe 単体で動作（インストール不要・Python等の事前導入は不要）</dd></div>
+      <div><dt>インターネット接続</dt><dd>株価等の公開資料の取得に必要</dd></div>
+      <div><dt>ライセンス</dt><dd>シェアウェア（無料体験版あり・購入でライセンスキーにより全機能解除）</dd></div>
+    </dl>
+    <p class="fn">株価等の情報は、お使いのパソコン上で公開されている資料から取得して計算します（当社のサーバーに株価データを蓄積・再配信することはありません。取得は必要最小限の範囲・間隔で行う設計です）。</p>
+  </section>
+
+  <section class="faq" id="faq">
+    <h2>よくある質問</h2>
+    <p class="sec-lede">ご購入前に、無料の体験版で動作・適合をご確認いただけます。</p>
+
+    <details open>
+      <summary>無料の体験版には、どんな制限がありますか？</summary>
+      <div class="a">
+        体験版には次の制限があります。<br>
+        (1) 登録できる銘柄は2件まで。<br>
+        (2) 計算結果の「前々月平均」と「評価額」は伏字（***）で表示されます。<br>
+        (3) 出力物（評価明細書PDF・Excel・証跡画像）に「体験版」の透かしが入ります。<br>
+        (4) プロジェクトの保存はできません。<br>
+        (5) 初回起動から24時間で体験期間が終了し、以降は計算・出力ができません。<br>
+        ライセンスキーをご購入・ご登録いただくと、上記の制限はすべて解除され、全機能をご利用いただけます。
+      </div>
+    </details>
+
+    <details>
+      <summary>どのように評価額を計算していますか？</summary>
+      <div class="a">財産評価基本通達169に基づき、相続開始日の終値（休日は近傍の営業日へ補正）と、当月・前月・前々月の月間平均終値の4つの価額を集計し、その最小値を評価額として採用します。</div>
+    </details>
+
+    <details>
+      <summary>出力される評価明細書PDFは、そのまま申告に使えますか？</summary>
+      <div class="a">出力（評価明細書PDF・Excel・証跡画像）は下書き・補助資料です。提出前に必ず原典（公開資料）と照合してください。最終的な確認・判断および申告の責任は、利用者（税理士等）に帰属します。</div>
+    </details>
+
+    <details>
+      <summary>株価データはどこから取得されますか？保存・再配信されますか？</summary>
+      <div class="a">株価等の情報は、利用者のパソコン上で公開資料から取得して計算します。当社のサーバーにデータを蓄積・再配信することはありません。取得は必要最小限の範囲・間隔で行う設計です。</div>
+    </details>
+
+    <details>
+      <summary>複数の銘柄をまとめて評価できますか？</summary>
+      <div class="a">できます。複数銘柄を一括で評価し、銘柄個別＋サマリーで出力します。上場廃止銘柄、英字を含む銘柄コード、ETF・REITにも対応しています。</div>
+    </details>
+
+    <details>
+      <summary>インストールやPythonの導入は必要ですか？</summary>
+      <div class="a">必要ありません。exe 単体で動作します（インストール不要・Python等の事前導入は不要）。なお、公開資料の取得にインターネット接続が必要です。</div>
+    </details>
+  </section>
+
+  <section class="legal" id="legal">
+    <h2>ご利用上の注意・免責</h2>
+    <p><strong>本ソフトは、相続税評価額の算定および申告書類作成を補助する計算ツール</strong>であり、税務上の助言を行うものではありません。評価額・申告内容の最終的な確認と判断、申告の責任は利用者（税理士等）に帰属します。</p>
+    <p>出力（評価明細書PDF・Excel・証跡画像）は<strong>下書き・補助資料</strong>です。提出前に必ず原典（公開資料）と照合してください。公開資料の様式変更・記載揺れ等により、取得値や判定が誤る可能性があります。正確性・完全性・継続的な動作は保証しません。</p>
+    <p>株価等の情報は、利用者のパソコン上で公開資料から取得します。当社はデータを保持・再配信しません。本ソフトの使用または使用不能により生じた損害について、当社は法令で許容される範囲で責任を負いません。</p>
+    <p>評価明細書PDFは、国税庁が公開する「上場株式の評価明細書」様式（資4-30）に基づき、本ソフトが各欄へ記入した下書きです（出典：国税庁）。<strong>様式そのものは国税庁の著作物であり、本ソフトが作成・編集したものではありません。</strong></p>
+
+    <div class="law-wrap">
+      <details>
+        <summary>特定商取引法に基づく表示</summary>
+        <table class="law">
+          <tr><th>販売事業者（屋号）</th><td>Nanax Soft</td></tr>
+          <tr><th>お問い合わせ窓口</th><td><a href="mailto:nanax.soft@gmail.com">nanax.soft@gmail.com</a></td></tr>
+          <tr><th>販売価格</th><td>¥9,800（税込）。Vector シェアレジ経由でのご購入の場合、価格には消費税および Vector 所定の手数料が含まれます。最新の金額は各商品ページの表示をご確認ください。</td></tr>
+          <tr><th>商品代金以外の必要料金</th><td>インターネット接続料金・通信料等はお客様のご負担となります。Vector シェアレジ経由でご購入の場合、シェアレジ所定の手数料が購入代金に含まれます。</td></tr>
+          <tr><th>お支払い方法</th><td>販売チャネル（Vector シェアレジ等）が定める方法によります。</td></tr>
+          <tr><th>お支払い時期</th><td>各販売チャネルの定めによります。</td></tr>
+          <tr><th>商品の引渡時期</th><td>ダウンロード商品です。お支払い確認後、ダウンロード／ライセンスキーのご案内をもって提供します。</td></tr>
+          <tr><th>返品・キャンセル</th><td>デジタル商品の性質上、ご購入後の返品・返金はお受けできません。ご購入前に、動作環境・ご利用上の注意・免責事項を必ずご確認ください。無料の体験版で、動作・ご利用環境との適合を必ずご確認のうえご購入ください。</td></tr>
+          <tr><th>動作環境</th><td>Windows（64bit）。詳細は上記の動作環境欄をご確認ください。</td></tr>
+        </table>
+        <p class="fn">事業者の氏名・住所・電話番号は、ご請求をいただいた場合、上記のお問い合わせ窓口より遅滞なく（電子メールにて）開示します。</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="close" id="vector">
+    <h2>まずは無料体験版で、動作と適合を。</h2>
+    <p>配布・決済はVector（ソフトライブラリ＝本体／シェアレジ＝ライセンスキー）が行います。ご購入いただくと、ライセンスキーで全機能をご利用いただけます。</p>
+    <div class="priceline">
+      <span class="price">¥9,800 <small>（税込・買い切り）</small></span>
+      <a class="cta-link" href="https://www.vector.co.jp/soft/winnt/business/se529138.html">無料体験版をダウンロード →</a>
+    </div>
+    <p class="trial-note" style="margin-top:var(--space-2xs); font-size:var(--text-sm); color:var(--color-neutral);">ご不明な点は <a href="mailto:nanax.soft@gmail.com">nanax.soft@gmail.com</a> まで。</p>
+  </section>
+
+  <footer>
+    <p class="fbrand">上場株式の相続税評価額 計算ツール（StockValuation）</p>
+    <p>販売事業者：Nanax Soft（屋号）／お問い合わせ：<a href="mailto:nanax.soft@gmail.com">nanax.soft@gmail.com</a>。本ソフトは相続税評価額の算定・申告書類作成を補助する計算ツールであり、税務上の助言を行うものではありません。出力は下書き・補助資料です。提出前に必ず原典と照合してください。評価明細書の様式は国税庁の著作物です（出典：国税庁・資4-30）。</p>
+    <p>© Nanax Soft</p>
+  </footer>
+
+</div>
+
+<div class="sticky-cta" id="stickyCta" aria-hidden="true">
+  <div class="inner">
+    <span class="p">¥9,800 <small>（税込・無料体験版あり）</small></span>
+    <a href="https://www.vector.co.jp/soft/winnt/business/se529138.html">無料体験版をダウンロード →</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ツアーと証跡だけ、一度きりのスクロール開示（全セクションには掛けない）
+  if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var targets = document.querySelectorAll('.stop, .evidence .row');
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, { rootMargin: '0px 0px -12% 0px' });
+    targets.forEach(function(t){ t.classList.add('reveal'); io.observe(t); });
+  }
+  var bar = document.getElementById('stickyCta');
+  var sentinel = document.getElementById('features');
+  var closer = document.getElementById('vector');
+  if(!bar || !sentinel || !('IntersectionObserver' in window)) return;
+  var pastTour = false, atClose = false;
+  function update(){
+    var show = pastTour && !atClose;
+    bar.classList.toggle('show', show);
+    bar.setAttribute('aria-hidden', show ? 'false' : 'true');
+  }
+  new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.boundingClientRect.top < 0 || e.isIntersecting) pastTour = true; });
+    update();
+  }).observe(sentinel);
+  new IntersectionObserver(function(es){
+    es.forEach(function(e){ atClose = e.isIntersecting; });
+    update();
+  }).observe(closer);
+})();
+</script>
+</body>
+</html>
