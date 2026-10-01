@@ -1,0 +1,4 @@
+[
+  { "date": "2026-10-01", "scope": "app", "macrostructure": "bespoke: 帳票（上場株式の評価明細書）", "theme": "custom", "theme_axes": "light / high-contrast-serif / warm", "vibe": "生成りの帳票・墨・朱の採用印・蛍光黄の証跡", "enrichment": "none (実出力の照合盤＋実スクリーンショット)", "nav": "N6 masthead + ページ内目次", "footer": "欄外注記＋様式記号", "brief": "StockValuation LP 再設計（税理士・相続人・無料体験版へ）。design.md 管理" },
+  { "date": "2026-07-24", "macrostructure": "Workbench", "theme": "custom", "theme_axes": "light / classical-serif / cool", "vibe": "官公庁様式・台帳・信頼の紺", "enrichment": "none", "nav": "N9", "footer": "Ft4", "brief": "StockValuation 税務ソフトLP redesign（税理士向け・落ち着いた信頼感・日本語）" }
+]
