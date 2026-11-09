@@ -207,6 +207,17 @@ h3{ font-family:var(--font-display); font-weight:700; font-style:normal; font-si
 .sec-lede{ margin-top:var(--space-sm); color:var(--color-muted); max-width:var(--measure); }
 .fn{ font-size:var(--text-sm); color:var(--color-neutral); line-height:1.8; }
 
+/* ── お知らせ（欄外の注記の帯。見出し書体は使わない＝部分フォントの字を増やさない）── */
+.notice{ margin-top:var(--space-md); }
+.notice .box{ border-top:var(--rule-strong) solid var(--color-ink); border-bottom:var(--rule-hair) solid var(--color-ink); background:var(--color-paper-2); padding:var(--space-sm) var(--space-md); display:grid; grid-template-columns:auto minmax(0,1fr); gap:var(--space-2xs) var(--space-lg); align-items:start; }
+.notice .lbl{ font-weight:700; font-size:var(--text-sm); letter-spacing:.14em; line-height:1.9; white-space:nowrap; }
+.notice .lbl .num{ display:block; font-weight:400; letter-spacing:0; font-size:var(--text-xs); color:var(--color-neutral); }
+.notice .txt{ min-width:0; font-size:var(--text-sm); line-height:1.9; }
+.notice .txt p{ margin:0; }
+.notice .txt p + p{ margin-top:var(--space-2xs); }
+.notice .txt strong{ font-weight:700; }
+@media (max-width:40rem){ .notice .box{ grid-template-columns:1fr; } }
+
 /* ── これまで（課題）──────────────────────────── */
 .before{ margin-top:calc(var(--space-xl) * -1); display:grid; grid-template-columns:minmax(0, 5fr) minmax(0, 7fr); gap:var(--space-lg) clamp(2rem, 5vw, 5rem); align-items:end; }
 .before figure{ min-width:0; }
@@ -397,9 +408,19 @@ footer .formmark{ text-align:right; max-width:none; font-family:var(--font-num);
   </div>
   <hr class="double">
   <nav class="toc" aria-label="ページ内の目次">
-    <a href="#how">使い方</a><a href="#evidence">証跡</a><a href="#features">主な機能</a><a href="#env">動作環境</a><a href="#faq">よくある質問</a><a href="#legal">注意・免責・特商法</a>
+    <a href="#news">お知らせ</a><a href="#how">使い方</a><a href="#evidence">証跡</a><a href="#features">主な機能</a><a href="#env">動作環境</a><a href="#faq">よくある質問</a><a href="#legal">注意・免責・特商法</a>
   </nav>
 </header>
+
+<aside class="notice wrap" id="news" aria-labelledby="h-news">
+  <div class="box">
+    <p class="lbl" id="h-news">お知らせ<span class="num">2026年11月9日</span></p>
+    <div class="txt">
+      <p><strong>現在公開中の 7.1.3 で、銘柄一覧と相続開始日の終値が取得できない不具合があります。</strong>日本取引所グループ（JPX）が公開資料の配布形式を変更したことによるもので、2026年11月9日に利用者の方からのご指摘で把握しました。症状＝(1) 銘柄の検索・登録で多くの銘柄名が出ない (2) 2026年9月以降の日付を相続開始日にすると終値が取得できない。</p>
+      <p>修正版 <span class="num">7.1.4</span> を同日 Vector に登録し、審査後に公開されます（前回は登録から公開まで7日）。公開後はソフト起動時の更新確認でもお知らせします（「起動時に更新を確認する」が有効な場合）。ご購入済みの方は、公開後に Vector から新しい版をダウンロードしてそのままお使いください。ライセンスキーの再登録・再購入は不要です。ご不便をおかけして申し訳ありません。お問い合わせ：<a href="mailto:nanax.soft@gmail.com">nanax.soft@gmail.com</a></p>
+    </div>
+  </div>
+</aside>
 
 <main id="top">
   <div class="hero wrap">
