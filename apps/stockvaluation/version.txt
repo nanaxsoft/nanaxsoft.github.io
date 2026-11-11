@@ -1,5 +1,5 @@
 # StockValuation（上場株式の相続税評価）更新チェック用（アプリが起動時に読む。書式: key=value）
 # version=Vectorで現在公開中の版 / url=案内先（ライブラリ公開後に追記） / message=任意の1行告知
-version=7.1.3
+version=7.1.4
 url=https://www.vector.co.jp/soft/winnt/business/se529138.html
-message=最新版 7.1.3 を公開しました（評価明細書の現行様式（R8.7）に対応）
+message=最新版 7.1.4 を公開しました（JPX の配布形式の変更に対応＝銘柄一覧と終値の取得を修正）
